@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History of American Cinema</title>
+    
+    <!-- Load Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Load FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cinema: {
+                            dark: '#0f0f11',
+                            panel: '#1a1a1d',
+                            gold: '#d4af37',
+                            goldHover: '#f9d75c',
+                            text: '#e2e8f0',
+                            muted: '#94a3b8'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar for a polished look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f0f11;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4af37;
+        }
+
+        body {
+            background-color: #0f0f11;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        /* Timeline specific styles */
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, transparent, #d4af37 5%, #d4af37 95%, transparent);
+            transform: translateX(-50%);
+        }
+
+        @media (max-width: 768px) {
+            .timeline-line {
+                left: 20px;
+                transform: none;
+            }
+        }
+
+        /* Animation Classes for Scroll Observer */
+        .reveal-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal-right {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+        .active-reveal {
+            opacity: 1;
+            transform: translate(0, 0);
+        }
+
+        /* Gradient Text utility */
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #d4af37, #f9d75c);
+        }
+        
+        /* Modal Backdrop blur */
+        .modal-backdrop {
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-cinema-gold selection:text-black min-h-screen flex flex-col">
+
+    <!-- Header Section -->
+    <header class="relative py-20 px-6 text-center border-b border-gray-800 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-cinema-dark opacity-90"></div>
+        <div class="relative z-10 max-w-4xl mx-auto reveal-up">
+            <h1 class="text-5xl md:text-6xl font-serif font-bold mb-4">
+                The History of <span class="text-gradient">American Cinema</span>
+            </h1>
+            <p class="text-xl text-cinema-muted font-light mb-8 max-w-2xl mx-auto">
+                An interactive exploration of the technological, cultural, and industrial milestones that shaped the United States film industry.
+            </p>
+            
+            <!-- Filters -->
+            <div class="flex flex-wrap justify-center gap-3 mt-8" id="filter-container">
+                <button data-filter="all" class="filter-btn px-5 py-2 rounded-full border transition-colors duration-300 bg-cinema-gold text-black font-semibold shadow-[0_0_15px_rgba(212,175,55,0.4)] border-cinema-gold">
+                    All Eras
+                </button>
+                <button data-filter="early" class="filter-btn px-5 py-2 rounded-full border transition-colors duration-300 text-gray-300 border-gray-600 hover:border-cinema-gold hover:text-cinema-gold">
+                    Early Cinema (1870-1920s)
+                </button>
+                <button data-filter="golden" class="filter-btn px-5 py-2 rounded-full border transition-colors duration-300 text-gray-300 border-gray-600 hover:border-cinema-gold hover:text-cinema-gold">
+                    Golden Age (1927-1940s)
+                </button>
+                <button data-filter="new" class="filter-btn px-5 py-2 rounded-full border transition-colors duration-300 text-gray-300 border-gray-600 hover:border-cinema-gold hover:text-cinema-gold">
+                    New Hollywood (1960s-1970s)
+                </button>
+                <button data-filter="modern" class="filter-btn px-5 py-2 rounded-full border transition-colors duration-300 text-gray-300 border-gray-600 hover:border-cinema-gold hover:text-cinema-gold">
+                    Modern Era (1980s-Present)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Timeline Container -->
+    <main class="flex-grow relative w-full max-w-6xl mx-auto py-16 px-4 md:px-8">
+        <div class="timeline-line"></div>
+        
+        <!-- Timeline items will be injected here by JavaScript -->
+        <div id="timeline-content" class="relative z-10 w-full"></div>
+        
+        <!-- Empty State (Hidden by default) -->
+        <div id="empty-state" class="hidden text-center py-20">
+            <p class="text-2xl font-serif text-cinema-muted">No events found for this filter.</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 text-center border-t border-gray-800 text-cinema-muted text-sm mt-auto">
+        <p>Created for academic exploration. Content focuses on major theatrical milestones.</p>
+    </footer>
+
+    <!-- Detail Modal -->
+    <div id="detail-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div id="modal-overlay" class="absolute inset-0 bg-black/80 modal-backdrop transition-opacity opacity-0 duration-300"></div>
+        
+        <!-- Modal Content -->
+        <div id="modal-panel" class="relative bg-cinema-panel border border-gray-700 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transform scale-95 opacity-0 transition-all duration-300">
+            
+            <button id="close-modal" class="absolute top-4 right-4 text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-full w-8 h-8 flex items-center justify-center transition-colors z-10">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <!-- Image placeholder -->
+            <div id="modal-image-container" class="w-full h-48 md:h-64 bg-gray-800 relative overflow-hidden flex items-center justify-center">
+               <i id="modal-large-icon" class="fas fa-film text-6xl text-gray-600"></i>
+               <div class="absolute inset-0 bg-gradient-to-t from-cinema-panel to-transparent"></div>
+            </div>
+
+            <div class="p-6 md:p-8 relative">
+                <div id="modal-year" class="inline-block px-3 py-1 bg-cinema-gold text-black text-sm font-bold rounded mb-4 shadow-sm">
+                    Year
+                </div>
+                
+                <h2 id="modal-title" class="text-3xl md:text-4xl font-serif font-bold text-white mb-4 leading-tight">
+                    Event Title
+                </h2>
+                
+                <div class="w-16 h-1 bg-cinema-gold mb-6 rounded"></div>
+                
+                <div id="modal-description" class="text-gray-300 leading-relaxed space-y-4 text-lg">
+                    Description goes here.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Structure for the Timeline
+        const timelineData = [
+            {
+                id: "muybridge",
+                year: "1878",
+                title: "Capturing Motion",
+                category: "early",
+                short: "Eadweard Muybridge successfully captures a horse in motion using a series of still cameras.",
+                detail: "<p>In an effort to settle a debate about whether all four of a horse's hooves leave the ground simultaneously during a gallop, photographer Eadweard Muybridge set up a row of cameras triggered by tripwires in Palo Alto, California.</p><p>The resulting sequence of images, when viewed in rapid succession, created the illusion of motion. This experiment is widely considered the crucial conceptual leap that led to the invention of motion pictures.</p>",
+                icon: "fa-horse",
+                imgIcon: "fa-camera"
+            },
+            {
+                id: "kinetoscope",
+                year: "1894",
+                title: "The Kinetoscope Parlor",
+                category: "early",
+                short: "The world's first commercial motion-picture exhibition opens in New York City.",
+                detail: "<p>Utilizing Thomas Edison's Kinetoscope—a peep-hole viewing machine developed primarily by his assistant, William Kennedy Laurie Dickson—the first commercial exhibition of motion pictures took place.</p><p>Unlike modern cinemas where audiences watch a shared screen, Kinetoscope parlors required patrons to view short, silent, continuous loops of film individually through a viewer at the top of a cabinet. This established the financial viability of moving images.</p>",
+                icon: "fa-eye",
+                imgIcon: "fa-video"
+            },
+            {
+                id: "train-robbery",
+                year: "1903",
+                title: "The Great Train Robbery",
+                category: "early",
+                short: "Edwin S. Porter directs the first narrative action film, revolutionizing film editing.",
+                detail: "<p><em>The Great Train Robbery</em> was a massive commercial success and a milestone in film history. Running at about 12 minutes, it was one of the first films to tell a complex narrative using multiple locations and pioneering editing techniques like cross-cutting.</p><p>It also established the Western genre and concluded with an iconic, direct-to-camera shot of a bandit firing his gun at the audience, which terrified and thrilled early viewers.</p>",
+                icon: "fa-train",
+                imgIcon: "fa-film"
+            },
+            {
+                id: "nickelodeons",
+                year: "1905",
+                title: "Rise of the Nickelodeon",
+                category: "early",
+                short: "The first dedicated movie theater opens in Pittsburgh, costing just five cents for admission.",
+                detail: "<p>Harry Davis and John Harris opened a storefront theater in Pittsburgh, coining the term 'Nickelodeon' (combining the price of admission—a nickel—with the Greek word for theater). </p><p>These affordable venues democratized entertainment, appealing heavily to working-class immigrants in urban centers. By 1910, thousands of Nickelodeons had spread across the United States, cementing movie-going as a staple of American culture.</p>",
+                icon: "fa-ticket-alt",
+                imgIcon: "fa-store"
+            },
+            {
+                id: "hollywood-moves",
+                year: "1910s",
+                title: "Migration to Hollywood",
+                category: "early",
+                short: "Filmmakers migrate to Southern California to escape patent fees and chase the sun.",
+                detail: "<p>Originally, the US film industry was based on the East Coast (particularly New Jersey). However, Thomas Edison held strict patents on motion picture technology, and his 'Trust' aggressively enforced them.</p><p>Independent filmmakers fled west to Los Angeles. Southern California offered a diverse geography (ocean, mountains, deserts) ideal for location shooting, consistent sunshine for lighting, and distance from Edison's lawyers. By the 1920s, Hollywood was the undisputed capital of global cinema.</p>",
+                icon: "fa-sun",
+                imgIcon: "fa-map-marker-alt"
+            },
+            {
+                id: "jazz-singer",
+                year: "1927",
+                title: "The Jazz Singer & Sync Sound",
+                category: "golden",
+                short: "Warner Bros. releases the first feature-length film with synchronized dialogue.",
+                detail: "<p>While films were rarely truly 'silent' (they were accompanied by live music), <em>The Jazz Singer</em>, starring Al Jolson, was the first feature film to include synchronized dialogue and singing on the film strip itself via the Vitaphone sound-on-disc system.</p><p>The famous line, \"You ain't heard nothin' yet!\" heralded the end of the silent era. The transition to 'talkies' fundamentally changed acting styles, scriptwriting, and studio infrastructure.</p>",
+                icon: "fa-microphone-alt",
+                imgIcon: "fa-music"
+            },
+            {
+                id: "snow-white",
+                year: "1937",
+                title: "Snow White & The Seven Dwarfs",
+                category: "golden",
+                short: "Walt Disney produces the first feature-length cel animated film.",
+                detail: "<p>Dubbed \"Disney's Folly\" during its expensive and grueling production, <em>Snow White</em> proved skeptics wrong by becoming an unprecedented critical and commercial triumph.</p><p>It proved that animation could sustain audience interest over a feature runtime, convey deep emotional resonance, and generate massive box office returns, laying the foundation for the Walt Disney Company's entertainment empire.</p>",
+                icon: "fa-apple-alt",
+                imgIcon: "fa-paint-brush"
+            },
+            {
+                id: "greatest-year",
+                year: "1939",
+                title: "The Zenith of the Studio System",
+                category: "golden",
+                short: "Considered the greatest year in film history, featuring 'Gone with the Wind' and 'The Wizard of Oz'.",
+                detail: "<p>1939 represents the absolute peak of the classical Hollywood studio system. Studios operated like factories, with actors, directors, and technicians on strict contracts.</p><p>This year saw the release of cinematic landmarks like <em>Gone with the Wind</em>, <em>The Wizard of Oz</em>, <em>Stagecoach</em>, and <em>Mr. Smith Goes to Washington</em>. It was an era characterized by immense glamour, technological mastery of the 3-strip Technicolor process, and narrative perfection.</p>",
+                icon: "fa-star",
+                imgIcon: "fa-award"
+            },
+            {
+                id: "paramount-decree",
+                year: "1948",
+                title: "The Paramount Decree",
+                category: "new",
+                short: "The Supreme Court breaks up the studio monopoly, changing film distribution forever.",
+                detail: "<p>In <em>United States v. Paramount Pictures, Inc.</em>, the Supreme Court ruled that the major studios' practice of owning the theaters that showed their films violated antitrust laws. </p><p>Studios were forced to sell their theater chains. This ended the 'Golden Age' studio system, opened the door for independent theaters and producers, and eventually led to the modern system of film financing and distribution.</p>",
+                icon: "fa-gavel",
+                imgIcon: "fa-balance-scale"
+            },
+            {
+                id: "widescreen",
+                year: "1953",
+                title: "Battling Television: Widescreen",
+                category: "new",
+                short: "Hollywood introduces CinemaScope to differentiate the theatrical experience from TV.",
+                detail: "<p>As television ownership exploded in the 1950s, movie attendance plummeted. To coax audiences back to theaters, Hollywood needed to offer an experience TV couldn't match.</p><p>Studios introduced various widescreen formats (like CinemaScope), stereophonic sound, and even 3D. Films like <em>The Robe</em> (the first CinemaScope film) emphasized massive scale and spectacle, forever changing the aspect ratio of the silver screen.</p>",
+                icon: "fa-tv",
+                imgIcon: "fa-expand"
+            },
+            {
+                id: "jaws",
+                year: "1975",
+                title: "Birth of the Blockbuster",
+                category: "new",
+                short: "Steven Spielberg's 'Jaws' creates the modern summer blockbuster template.",
+                detail: "<p>Before <em>Jaws</em>, the summer was considered a dead season for movie releases. Universal Pictures changed this by opening <em>Jaws</em> on hundreds of screens simultaneously (wide release) backed by a massive national television advertising campaign.</p><p>It became the first film to gross over $100 million at the box office, fundamentally shifting Hollywood's business model toward high-concept, franchise-friendly event films.</p>",
+                icon: "fa-water",
+                imgIcon: "fa-fish"
+            },
+            {
+                id: "star-wars",
+                year: "1977",
+                title: "The Visual Effects Revolution",
+                category: "new",
+                short: "George Lucas's 'Star Wars' redefines special effects and merchandising.",
+                detail: "<p><em>Star Wars</em> advanced motion control photography and optical effects to unprecedented levels, leading to the creation of Industrial Light & Magic (ILM).</p><p>Beyond its technological achievements, it solidified the blockbuster era started by <em>Jaws</em> and demonstrated the massive, untapped potential of ancillary revenue streams, particularly toys and merchandising, which now dictate modern studio strategies.</p>",
+                icon: "fa-rocket",
+                imgIcon: "fa-meteor"
+            },
+            {
+                id: "toy-story",
+                year: "1995",
+                title: "The CGI Era Begins",
+                category: "modern",
+                short: "Pixar's 'Toy Story' is released as the first entirely computer-animated feature film.",
+                detail: "<p>Directed by John Lasseter, <em>Toy Story</em> took four years to render and required immense computational power. It proved that computer-generated imagery (CGI) could be used not just for brief special effects, but to create fully realized, emotionally compelling worlds and characters.</p><p>This milestone ultimately led to the near-total replacement of traditional 2D animation by 3D CGI in mainstream Hollywood theatrical releases.</p>",
+                icon: "fa-robot",
+                imgIcon: "fa-laptop-code"
+            },
+            {
+                id: "digital-cinema",
+                year: "2000s",
+                title: "The Digital Conversion",
+                category: "modern",
+                short: "The industry transitions from celluloid film to digital capture and projection.",
+                detail: "<p>Driven by filmmakers like George Lucas (who shot <em>Attack of the Clones</em> entirely digitally) and initiatives by the major studios to standardize digital projection, the 2000s and 2010s saw the rapid decline of 35mm film.</p><p>Digital distribution (via hard drives or satellite) eliminated the cost of printing and shipping heavy film reels, fundamentally altering how motion pictures are archived, distributed, and exhibited.</p>",
+                icon: "fa-compact-disc",
+                imgIcon: "fa-hdd"
+            }
+        ];
+
+        const timelineContainer = document.getElementById('timeline-content');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const emptyState = document.getElementById('empty-state');
+        
+        // Modal elements
+        const modal = document.getElementById('detail-modal');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalPanel = document.getElementById('modal-panel');
+        const closeModalBtn = document.getElementById('close-modal');
+        
+        // Render timeline
+        function renderTimeline(filter = 'all') {
+            timelineContainer.innerHTML = '';
+            
+            const filteredData = timelineData.filter(item => filter === 'all' || item.category === filter);
+            
+            if (filteredData.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filteredData.forEach((item, index) => {
+                // Determine if left or right side based on index
+                const isLeft = index % 2 === 0;
+                
+                // HTML generation
+                const itemHTML = `
+                    <div class="relative w-full mb-12 flex justify-between items-center ${isLeft ? 'flex-row-reverse md:flex-row' : 'flex-row-reverse'}">
+                        
+                        <!-- Desktop Spacer (Empty column) -->
+                        <div class="hidden md:block w-[45%]"></div>
+                        
+                        <!-- Center Node -->
+                        <div class="absolute left-5 md:left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full border-4 border-[#0f0f11] bg-cinema-gold text-black flex items-center justify-center z-20 shadow-[0_0_10px_rgba(212,175,55,0.6)] cursor-pointer hover:scale-110 hover:bg-white transition-transform duration-300 event-node" data-id="${item.id}">
+                            <i class="fas ${item.icon} text-sm"></i>
+                        </div>
+                        
+                        <!-- Content Card -->
+                        <div class="w-[calc(100%-4rem)] md:w-[45%] pl-10 md:pl-0 ${isLeft ? 'md:pr-10 md:text-right reveal-left' : 'md:pl-10 text-left reveal-right'}">
+                            <div class="bg-cinema-panel border border-gray-800 p-6 rounded-xl shadow-lg hover:border-gray-600 transition-colors duration-300 cursor-pointer event-card group relative overflow-hidden" data-id="${item.id}">
+                                <!-- Subtle background accent -->
+                                <div class="absolute top-0 ${isLeft ? 'right-0 rounded-bl-full' : 'left-0 rounded-br-full'} w-16 h-16 bg-cinema-gold opacity-5 group-hover:opacity-10 transition-opacity duration-300"></div>
+                                
+                                <span class="inline-block text-cinema-gold font-bold text-lg mb-2">${item.year}</span>
+                                <h3 class="text-2xl font-serif text-white mb-2 group-hover:text-cinema-gold transition-colors">${item.title}</h3>
+                                <p class="text-gray-400 text-sm md:text-base">${item.short}</p>
+                                
+                                <div class="mt-4 text-xs font-semibold uppercase tracking-wider text-gray-500 flex items-center ${isLeft ? 'md:justify-end' : 'justify-start'}">
+                                    <span class="group-hover:text-cinema-gold transition-colors">Read more</span>
+                                    <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                timelineContainer.insertAdjacentHTML('beforeend', itemHTML);
+            });
+            
+            // Re-initialize intersection observer for new elements
+            setupIntersectionObserver();
+            
+            // Attach click listeners to new elements
+            attachModalListeners();
+        }
+
+        // Scroll animations
+        function setupIntersectionObserver() {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active-reveal');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.reveal-left, .reveal-right').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // Filter functionality
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Remove active styling from all
+                filterBtns.forEach(b => {
+                    b.classList.remove('bg-cinema-gold', 'text-black', 'font-semibold', 'shadow-[0_0_15px_rgba(212,175,55,0.4)]', 'border-cinema-gold');
+                    b.classList.add('text-gray-300', 'border-gray-600', 'hover:border-cinema-gold', 'hover:text-cinema-gold');
+                });
+                
+                // Add active styling to clicked
+                const target = e.target;
+                target.classList.remove('text-gray-300', 'border-gray-600', 'hover:border-cinema-gold', 'hover:text-cinema-gold');
+                target.classList.add('bg-cinema-gold', 'text-black', 'font-semibold', 'shadow-[0_0_15px_rgba(212,175,55,0.4)]', 'border-cinema-gold');
+                
+                const filter = target.getAttribute('data-filter');
+                renderTimeline(filter);
+            });
+        });
+
+        // Modal Functionality
+        function openModal(id) {
+            const data = timelineData.find(item => item.id === id);
+            if (!data) return;
+
+            // Populate data
+            document.getElementById('modal-year').textContent = data.year;
+            document.getElementById('modal-title').textContent = data.title;
+            document.getElementById('modal-description').innerHTML = data.detail;
+            document.getElementById('modal-large-icon').className = `fas ${data.imgIcon} text-7xl text-gray-700 opacity-50`;
+
+            // Show modal
+            modal.classList.remove('hidden');
+            
+            // Trigger animation on next frame
+            requestAnimationFrame(() => {
+                modalOverlay.classList.remove('opacity-0');
+                modalPanel.classList.remove('scale-95', 'opacity-0');
+                modalPanel.classList.add('scale-100', 'opacity-100');
+            });
+            
+            // Prevent body scrolling
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            // Animate out
+            modalOverlay.classList.add('opacity-0');
+            modalPanel.classList.remove('scale-100', 'opacity-100');
+            modalPanel.classList.add('scale-95', 'opacity-0');
+            
+            // Hide after animation finishes
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto'; // Restore scrolling
+            }, 300);
+        }
+
+        function attachModalListeners() {
+            const clickables = document.querySelectorAll('.event-card, .event-node');
+            clickables.forEach(el => {
+                el.addEventListener('click', () => {
+                    openModal(el.getAttribute('data-id'));
+                });
+            });
+        }
+
+        closeModalBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', closeModal);
+        
+        // Escape key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderTimeline('all');
+            
+            // Small delay to trigger header animation
+            setTimeout(() => {
+                document.querySelector('.reveal-up').classList.add('active-reveal');
+            }, 100);
+        });
+    </script>
+</body>
+</html>
